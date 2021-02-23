@@ -1,4 +1,4 @@
-package com.mariuspaavel.staticutils;
+package com.mariuspaavel.javautilities;
 
 public class Base64 {
 	public static String encode(byte[] input) {

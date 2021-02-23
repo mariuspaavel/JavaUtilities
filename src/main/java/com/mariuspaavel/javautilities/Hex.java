@@ -1,4 +1,4 @@
-package com.mariuspaavel.staticutils;
+package com.mariuspaavel.javautilities;
 
 import java.io.PrintStream;
 
