@@ -1,6 +1,6 @@
 package com.mariuspaavel.javautilities;
 
-public class Base64 {
+public class B64 {
 	public static String encode(byte[] input) {
 		int octetLen = input.length;
 		int numOfOctetBlocks = octetLen / 3;
@@ -69,9 +69,7 @@ public class Base64 {
 			else if(b64byte >= 48 && b64byte < 58)b64bits = 52 + b64byte - 48;
 			else if(b64byte == 43)b64bits = 62;
 			else b64bits = 63;
-			
-			
-			
+					
 			b64Buf <<= 6;
 			b64Buf |= b64bits;
 			b64BufSize += 6;
