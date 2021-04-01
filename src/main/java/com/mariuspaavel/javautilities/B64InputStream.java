@@ -6,7 +6,7 @@ import java.io.*;
 * The source for base64 characters must be argumented to the constructor
 */
 
-public class B64InputStream implements InputStream{
+public class B64InputStream extends InputStream{
 	private InputStream source;
 	/**
 	*Create and instance of the InputStream.
@@ -15,43 +15,50 @@ public class B64InputStream implements InputStream{
 	public B64InputStream(InputStream source){
 		this.source = source;
 	}
-	private int translateBits(int input{
+	private int translateBits(int input){
 
 		int b64bits = 0;
-		if(b64byte >= 65 && b64byte < 91) b64bits = b64byte - 65;
-		else if(b64byte >= 97 && b64byte < 123) b64bits = 26 + b64byte - 97;
-		else if(b64byte >= 48 && b64byte < 58)b64bits = 52 + b64byte - 48;
-		else if(b64byte == 43)b64bits = 62;
+		if(input >= 65 && input < 91) b64bits = input - 65;
+		else if(input >= 97 && input < 123) b64bits = 26 + input - 97;
+		else if(input >= 48 && input < 58)b64bits = 52 + input - 48;
+		else if(input == 43)b64bits = 62;
 		else b64bits = 63;
 		
 		return b64bits;	
 	}
 	private int buf;
 	private int bufSize;
-	private void fillBuf(){
+	private boolean fillBuf() throws IOException{
 		int rawInput = source.read();
+		if(rawInput == -1) return false;
 		int translatedBits = translateBits(rawInput);
 		buf <<= 6;
 		buf |= translatedBits;
 		bufSize += 6;	
+		return true;
 	}
 	int readBuf(){
 		return (buf >> (bufSize - 8)) & 0xFF;
 	}
 	@Override
-	public int read(){
-		if(buflen < 6)fillBuf();
-		readBuf();
+	public int read() throws IOException{
+		if(bufSize < 6 && fillBuf())return readBuf();
+		else return -1;
 	}
 	@Override
-	public void read(byte[] b, int off, int len){
-		for(int i = off; i < off+len; i++){
-			b[i] = read();
+	public int read(byte[] b, int off, int len) throws IOException{
+		int i = off;
+		while(true){
+			int bits = read();
+			if(bits == -1)return off-i;
+			b[i] = (byte)read();
+			if(i >= off+len)return off-i;
+			i++;
 		}
 	}
 	@Override
-	public void read(byte[] b){
-		read(b, 0, b.length);
+	public int read(byte[] b) throws IOException{
+		return read(b, 0, b.length);
 	}
 	private int markBuf;
 	private int markBufSize;
@@ -67,9 +74,13 @@ public class B64InputStream implements InputStream{
 		return source.markSupported();
 	}
 	@Override
-	public void reset(){
+	public void reset() throws IOException{
 		source.reset();
 		buf = markBuf;
 		bufSize = markBufSize;
+	}
+	@Override
+	public int available() throws IOException{
+		return source.available()*3/4;
 	}
 }
